@@ -6,12 +6,15 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{{ title or 'JL Elétrica' }}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo-jl-eletrica.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar">
-    <div class="brand"><div class="bolt">⚡</div><div><strong>JL Elétrica</strong><small>Gestão de serviços</small></div></div>
+    <div class="brand brand-logo">
+      <img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica">
+    </div>
     <nav class="nav">
       {{ nav('/', '⌂', 'Dashboard') }}
       {{ nav('/clientes', '👤', 'Clientes') }}

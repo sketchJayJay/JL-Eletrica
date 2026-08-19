@@ -26,3 +26,6 @@ Sistema web de controle para serviços elétricos.
 5. Se quiser, defina `SECRET_KEY` nas variáveis de ambiente.
 
 A porta interna é 8000.
+
+## Inicialização do banco
+O banco SQLite é inicializado uma única vez por `init_db.py` antes do Gunicorn, evitando conflito entre workers no primeiro deploy.

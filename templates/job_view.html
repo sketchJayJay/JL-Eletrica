@@ -6,7 +6,7 @@
 <a class="btn btn-primary" href="/{{ 'os' if kind=='os' else 'orcamentos' }}/{{record.id}}/editar">Editar</a>
 {% endblock %}
 {% block content %}
-<div class="print-only" style="margin-bottom:20px"><img src="{{url_for('static',filename='logo.svg')}}" style="width:330px;max-width:100%"></div>
+<div class="print-only print-brand"><img src="{{url_for('static',filename='logo-jl-eletrica.png')}}" alt="JL Elétrica"></div>
 <div class="card">
 <div class="grid-3">
   <div><strong>Cliente</strong><div>{{record.client.name}}</div><div style="color:#6b7280">{{record.client.phone or ''}}</div></div>

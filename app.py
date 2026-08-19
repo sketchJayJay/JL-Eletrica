@@ -282,9 +282,5 @@ def finance():
     recebido=sum(float(x.total or 0) for x in orders if x.paid); receber=sum(float(x.total or 0) for x in orders if not x.paid); total=recebido+receber
     return render_template("finance.html",mes=mes,orders=orders,recebido=recebido,receber=receber,total=total,ticket=(total/len(orders) if orders else 0))
 
-with app.app_context():
-    os.makedirs("data",exist_ok=True)
-    db.create_all()
-
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=8000,debug=True)

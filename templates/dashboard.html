@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% set heading='Dashboard' %}{% set subtitle='Visão rápida do mês e do andamento dos serviços.' %}
 {% block content %}
+<div class="card dashboard-brand no-print" style="display:flex;align-items:center;gap:18px;padding:16px 18px">
+  <img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica" style="width:120px;max-width:32%;border-radius:12px">
+  <div>
+    <strong style="font-size:18px">JL Elétrica</strong>
+    <div style="color:#6b7280;margin-top:4px">Soluções elétricas inteligentes</div>
+  </div>
+</div>
 <div class="grid-kpi">
   <div class="kpi"><span>Faturado no mês</span><strong>{{ brl(receita_mes) }}</strong><div class="hint">OS pagas</div></div>
   <div class="kpi"><span>OS no mês</span><strong>{{ os_mes }}</strong><div class="hint">{{ os_abertas }} em aberto</div></div>
