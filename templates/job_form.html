@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% set heading = ('Editar OS' if kind=='os' else 'Editar orçamento') if record else ('Nova OS' if kind=='os' else 'Novo orçamento') %}
+{% set subtitle='Adicione serviços e materiais. O total é calculado automaticamente.' %}
+{% block content %}
+<div class="card"><form method="post">
+<div class="grid-3">
+  <div class="field"><label>Cliente *</label><input type="search" placeholder="Digite para buscar o cliente..." oninput="filterSelect(this,'client-select')"><select id="client-select" name="client_id" required><option value="">Selecione</option>{% for c in clients %}<option value="{{c.id}}" {{ 'selected' if record and record.client_id==c.id else '' }}>{{c.name}}{% if c.phone %} — {{c.phone}}{% endif %}</option>{% endfor %}</select></div>
+  <div class="field"><label>Local / Obra</label><input type="search" placeholder="Buscar local ou obra..." oninput="filterSelect(this,'location-select')"><select id="location-select" name="location_id"><option value="">Sem local vinculado</option>{% for l in locations %}<option value="{{l.id}}" {{ 'selected' if record and record.location_id==l.id else '' }}>{{l.client.name}} — {{l.name}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Status</label><select name="status">{% for s in statuses %}<option value="{{s}}" {{ 'selected' if record and record.status==s else '' }}>{{s}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Data</label><input type="date" name="date" value="{{ record.date.isoformat() if record else today }}"></div>
+  {% if kind=='os' %}<div class="field"><label>Previsão / conclusão</label><input type="date" name="due_date" value="{{ record.due_date.isoformat() if record and record.due_date else '' }}"></div>{% endif %}
+  <div class="field"><label>Forma de pagamento</label><input name="payment_method" value="{{ record.payment_method if record else '' }}" placeholder="Pix, dinheiro, cartão..."></div>
+</div>
+<div class="field" style="margin-top:12px"><label>Descrição / problema relatado</label><textarea name="description">{{ record.description if record else '' }}</textarea></div>
+<h2 style="margin-top:20px">Itens</h2>
+<div id="items-box">
+{% if record and record.items %}
+  {% for item in record.items %}
+  <div class="item-row">
+    <div class="field"><input name="item_desc[]" value="{{item.description}}" required></div>
+    <div class="field"><input name="item_qty[]" type="number" step="0.01" min="0" value="{{item.qty}}" oninput="calcTotal()"></div>
+    <div class="field"><input name="item_price[]" type="number" step="0.01" min="0" value="{{item.unit_price}}" oninput="calcTotal()"></div>
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove();calcTotal()">×</button>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="item-row">
+    <div class="field"><input name="item_desc[]" placeholder="Descrição do serviço/material" required></div>
+    <div class="field"><input name="item_qty[]" type="number" step="0.01" min="0" value="1" oninput="calcTotal()"></div>
+    <div class="field"><input name="item_price[]" type="number" step="0.01" min="0" value="0" oninput="calcTotal()"></div>
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove();calcTotal()">×</button>
+  </div>
+{% endif %}
+</div>
+<button type="button" class="btn btn-outline btn-sm" onclick="addItemRow()">＋ Adicionar item</button>
+<div class="total-box">Total: <span id="total-preview">R$ 0,00</span></div>
+<div class="field" style="margin-top:12px"><label>Observações</label><textarea name="notes">{{ record.notes if record else '' }}</textarea></div>
+<div class="actions" style="margin-top:14px"><button class="btn btn-accent">Salvar</button><a class="btn btn-outline" href="/{{ 'os' if kind=='os' else 'orcamentos' }}">Cancelar</a></div>
+</form></div>
+{% endblock %}

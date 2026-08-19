@@ -1,0 +1,41 @@
+{% macro nav(path, icon, label) -%}
+<a href="{{ path }}" class="{{ 'active' if request.path == path or (path != '/' and request.path.startswith(path)) else '' }}"><span class="ico">{{ icon }}</span>{{ label }}</a>
+{%- endmacro %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or 'JL Elétrica' }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><div class="bolt">⚡</div><div><strong>JL Elétrica</strong><small>Gestão de serviços</small></div></div>
+    <nav class="nav">
+      {{ nav('/', '⌂', 'Dashboard') }}
+      {{ nav('/clientes', '👤', 'Clientes') }}
+      {{ nav('/locais', '📍', 'Locais / Obras') }}
+      {{ nav('/os', '🧰', 'Ordens de Serviço') }}
+      {{ nav('/orcamentos', '🧾', 'Orçamentos') }}
+      {{ nav('/financeiro', '💰', 'Financeiro') }}
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar no-print">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <button class="btn btn-outline mobile-menu" onclick="toggleSidebar()">☰</button>
+        <div class="title"><h1>{{ heading or title or 'JL Elétrica' }}</h1><p>{{ subtitle or '' }}</p></div>
+      </div>
+      <div class="actions">{% block top_actions %}{% endblock %}</div>
+    </div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}{% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

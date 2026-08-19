@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% set heading='Financeiro' %}{% set subtitle='Controle mensal de faturamento e valores a receber.' %}
+{% block content %}
+<div class="card no-print">
+<form class="actions" method="get"><div class="field"><label>Mês</label><input type="month" name="mes" value="{{mes}}"></div><button class="btn btn-primary" style="margin-top:20px">Filtrar</button></form>
+</div>
+<div class="grid-kpi">
+<div class="kpi"><span>Recebido</span><strong>{{brl(recebido)}}</strong><div class="hint">OS pagas no período</div></div>
+<div class="kpi"><span>A receber</span><strong>{{brl(receber)}}</strong><div class="hint">OS ainda não pagas</div></div>
+<div class="kpi"><span>Total gerado</span><strong>{{brl(total)}}</strong><div class="hint">Todas as OS do período</div></div>
+<div class="kpi"><span>Ticket médio</span><strong>{{brl(ticket)}}</strong><div class="hint">Média por OS</div></div>
+</div>
+<div class="card"><h2>Ordens do período</h2><div class="table-wrap"><table class="table">
+<thead><tr><th>OS</th><th>Data</th><th>Cliente</th><th>Status</th><th>Pagamento</th><th>Total</th></tr></thead><tbody>
+{% for x in orders %}<tr><td><a href="/os/{{x.id}}"><strong>#{{'%04d'|format(x.id)}}</strong></a></td><td>{{x.date.strftime('%d/%m/%Y')}}</td><td>{{x.client.name}}</td><td><span class="badge {{status_class(x.status)}}">{{x.status}}</span></td><td><span class="badge {{'green' if x.paid else 'yellow'}}">{{'Pago' if x.paid else 'Pendente'}}</span></td><td class="money">{{brl(x.total)}}</td></tr>{% else %}<tr><td colspan="6" class="empty">Nenhuma OS no período.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

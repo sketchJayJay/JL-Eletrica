@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% set heading='Dashboard' %}{% set subtitle='Visão rápida do mês e do andamento dos serviços.' %}
+{% block content %}
+<div class="grid-kpi">
+  <div class="kpi"><span>Faturado no mês</span><strong>{{ brl(receita_mes) }}</strong><div class="hint">OS pagas</div></div>
+  <div class="kpi"><span>OS no mês</span><strong>{{ os_mes }}</strong><div class="hint">{{ os_abertas }} em aberto</div></div>
+  <div class="kpi"><span>Orçamentos no mês</span><strong>{{ orc_mes }}</strong><div class="hint">{{ orc_aprovados }} aprovados</div></div>
+  <div class="kpi"><span>A receber</span><strong>{{ brl(a_receber) }}</strong><div class="hint">Serviços não pagos</div></div>
+</div>
+<div class="quick-links">
+  <a href="/os/novo">＋ Nova OS<small>Abrir ordem de serviço</small></a>
+  <a href="/orcamentos/novo">＋ Novo orçamento<small>Criar e imprimir</small></a>
+  <a href="/clientes/novo">＋ Novo cliente<small>Cadastro rápido</small></a>
+  <a href="/financeiro">↗ Financeiro<small>Resumo mensal</small></a>
+</div>
+<div class="grid-2" style="margin-top:18px">
+  <div class="card"><h2>Últimas ordens de serviço</h2>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
+    {% for x in ultimas_os %}<tr><td><a href="/os/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td><td>{{ x.client.name }}</td><td><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td><td class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhuma OS ainda.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+  <div class="card"><h2>Últimos orçamentos</h2>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
+    {% for x in ultimos_orc %}<tr><td><a href="/orcamentos/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td><td>{{ x.client.name }}</td><td><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td><td class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhum orçamento ainda.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+</div>
+{% endblock %}

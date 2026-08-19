@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block top_actions %}<a class="btn btn-accent" href="{{ new_url }}">＋ Novo</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <form class="searchbar no-print" method="get">
+    <input class="field" style="padding:11px 12px;border:1px solid #d9dee8;border-radius:10px" name="q" value="{{ q }}" placeholder="{{ search_placeholder or 'Pesquisar...' }}">
+    <button class="btn btn-primary">Pesquisar</button>
+    {% if q %}<a class="btn btn-outline" href="{{ request.path }}">Limpar</a>{% endif %}
+  </form>
+</div>
+<div class="card">
+  <div class="table-wrap"><table class="table">
+    <thead><tr>{% for h in headers %}<th>{{ h }}</th>{% endfor %}<th>Ações</th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+      {% for cell in row.cells %}<td>{{ cell|safe }}</td>{% endfor %}
+      <td><div class="actions">
+        {% if row.open_url %}<a class="btn btn-outline btn-sm" href="{{ row.open_url }}">Abrir</a>{% endif %}
+        <a class="btn btn-outline btn-sm" href="{{ row.edit_url }}">Editar</a>
+        <form method="post" action="{{ row.delete_url }}" onsubmit="return confirmDelete()"><button class="btn btn-danger btn-sm">Excluir</button></form>
+      </div></td>
+      </tr>
+    {% else %}<tr><td colspan="{{ headers|length + 1 }}" class="empty">Nenhum registro encontrado.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% set heading=('Ordem de Serviço #' if kind=='os' else 'Orçamento #') ~ '%04d'|format(record.id) %}
+{% set subtitle=record.client.name %}
+{% block top_actions %}
+<button class="btn btn-outline" onclick="window.print()">🖨 Imprimir</button>
+<a class="btn btn-primary" href="/{{ 'os' if kind=='os' else 'orcamentos' }}/{{record.id}}/editar">Editar</a>
+{% endblock %}
+{% block content %}
+<div class="print-only" style="margin-bottom:20px"><img src="{{url_for('static',filename='logo.svg')}}" style="width:330px;max-width:100%"></div>
+<div class="card">
+<div class="grid-3">
+  <div><strong>Cliente</strong><div>{{record.client.name}}</div><div style="color:#6b7280">{{record.client.phone or ''}}</div></div>
+  <div><strong>Data</strong><div>{{record.date.strftime('%d/%m/%Y')}}</div></div>
+  <div><strong>Status</strong><div><span class="badge {{status_class(record.status)}}">{{record.status}}</span></div></div>
+  {% if record.location %}<div><strong>Local / Obra</strong><div>{{record.location.name}}</div><div style="color:#6b7280">{{record.location.address or ''}}</div></div>{% endif %}
+  <div><strong>Pagamento</strong><div>{{record.payment_method or 'Não informado'}}</div></div>
+  {% if kind=='os' and record.due_date %}<div><strong>Previsão</strong><div>{{record.due_date.strftime('%d/%m/%Y')}}</div></div>{% endif %}
+</div>
+{% if record.description %}<hr style="border:none;border-top:1px solid #eee;margin:16px 0"><strong>Descrição</strong><p>{{record.description}}</p>{% endif %}
+</div>
+<div class="card"><h2>Serviços e materiais</h2>
+<div class="table-wrap"><table class="table"><thead><tr><th>Descrição</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr></thead><tbody>
+{% for i in record.items %}<tr><td>{{i.description}}</td><td>{{i.qty}}</td><td>{{brl(i.unit_price)}}</td><td class="money">{{brl(i.total)}}</td></tr>{% endfor %}
+</tbody></table></div><div class="total-box">Total: {{brl(record.total)}}</div></div>
+
+<div class="card no-print">
+  <div class="actions">
+    {% if kind=='os' %}
+      <form method="post" action="/os/{{record.id}}/toggle-pago"><button class="btn {{'btn-outline' if record.paid else 'btn-success'}}">{{'Marcar como não pago' if record.paid else '✓ Marcar como pago'}}</button></form>
+    {% else %}
+      {% if record.status != 'Aprovado' %}<form method="post" action="/orcamentos/{{record.id}}/aprovar"><button class="btn btn-success">✓ Aprovar orçamento</button></form>{% endif %}
+      <form method="post" action="/orcamentos/{{record.id}}/converter"><button class="btn btn-accent">⚡ Converter em OS</button></form>
+    {% endif %}
+    <form method="post" action="/{{'os' if kind=='os' else 'orcamentos'}}/{{record.id}}/excluir" onsubmit="return confirmDelete()"><button class="btn btn-danger">Excluir</button></form>
+  </div>
+</div>
+{% if record.notes %}<div class="card"><h2>Observações</h2><p>{{record.notes}}</p></div>{% endif %}
+{% endblock %}
