@@ -11,6 +11,7 @@
 </head>
 <body>
 <div class="layout">
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
   <aside class="sidebar">
     <div class="brand brand-logo">
       <img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica">
@@ -38,6 +39,14 @@
     {% block content %}{% endblock %}
   </main>
 </div>
+
+<nav class="mobile-bottom-nav no-print">
+  <a href="/" class="{{ 'active' if request.path == '/' else '' }}"><span>⌂</span><small>Início</small></a>
+  <a href="/os" class="{{ 'active' if request.path.startswith('/os') else '' }}"><span>🧰</span><small>OS</small></a>
+  <a href="/orcamentos" class="{{ 'active' if request.path.startswith('/orcamentos') else '' }}"><span>🧾</span><small>Orç.</small></a>
+  <a href="/clientes" class="{{ 'active' if request.path.startswith('/clientes') else '' }}"><span>👤</span><small>Clientes</small></a>
+  <a href="/financeiro" class="{{ 'active' if request.path.startswith('/financeiro') else '' }}"><span>💰</span><small>Financeiro</small></a>
+</nav>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>

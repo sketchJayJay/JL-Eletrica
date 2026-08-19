@@ -23,12 +23,20 @@
 <div class="grid-2" style="margin-top:18px">
   <div class="card"><h2>Últimas ordens de serviço</h2>
     <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
-    {% for x in ultimas_os %}<tr><td><a href="/os/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td><td>{{ x.client.name }}</td><td><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td><td class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhuma OS ainda.</td></tr>{% endfor %}
+    {% for x in ultimas_os %}<tr>
+<td data-label="Nº"><a href="/os/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
+<td data-label="Cliente">{{ x.client.name }}</td>
+<td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
+<td data-label="Total" class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhuma OS ainda.</td></tr>{% endfor %}
     </tbody></table></div>
   </div>
   <div class="card"><h2>Últimos orçamentos</h2>
     <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
-    {% for x in ultimos_orc %}<tr><td><a href="/orcamentos/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td><td>{{ x.client.name }}</td><td><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td><td class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhum orçamento ainda.</td></tr>{% endfor %}
+    {% for x in ultimos_orc %}<tr>
+<td data-label="Nº"><a href="/orcamentos/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
+<td data-label="Cliente">{{ x.client.name }}</td>
+<td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
+<td data-label="Total" class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhum orçamento ainda.</td></tr>{% endfor %}
     </tbody></table></div>
   </div>
 </div>

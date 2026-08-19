@@ -12,6 +12,12 @@
 </div>
 <div class="card"><h2>Ordens do período</h2><div class="table-wrap"><table class="table">
 <thead><tr><th>OS</th><th>Data</th><th>Cliente</th><th>Status</th><th>Pagamento</th><th>Total</th></tr></thead><tbody>
-{% for x in orders %}<tr><td><a href="/os/{{x.id}}"><strong>#{{'%04d'|format(x.id)}}</strong></a></td><td>{{x.date.strftime('%d/%m/%Y')}}</td><td>{{x.client.name}}</td><td><span class="badge {{status_class(x.status)}}">{{x.status}}</span></td><td><span class="badge {{'green' if x.paid else 'yellow'}}">{{'Pago' if x.paid else 'Pendente'}}</span></td><td class="money">{{brl(x.total)}}</td></tr>{% else %}<tr><td colspan="6" class="empty">Nenhuma OS no período.</td></tr>{% endfor %}
+{% for x in orders %}<tr>
+<td data-label="OS"><a href="/os/{{x.id}}"><strong>#{{'%04d'|format(x.id)}}</strong></a></td>
+<td data-label="Data">{{x.date.strftime('%d/%m/%Y')}}</td>
+<td data-label="Cliente">{{x.client.name}}</td>
+<td data-label="Status"><span class="badge {{status_class(x.status)}}">{{x.status}}</span></td>
+<td data-label="Pagamento"><span class="badge {{'green' if x.paid else 'yellow'}}">{{'Pago' if x.paid else 'Pendente'}}</span></td>
+<td data-label="Total" class="money">{{brl(x.total)}}</td></tr>{% else %}<tr><td colspan="6" class="empty">Nenhuma OS no período.</td></tr>{% endfor %}
 </tbody></table></div></div>
 {% endblock %}

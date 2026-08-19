@@ -1,5 +1,11 @@
 
-function toggleSidebar(){document.querySelector('.sidebar')?.classList.toggle('open')}
+function toggleSidebar(){
+  const sidebar=document.querySelector('.sidebar');
+  const backdrop=document.querySelector('.sidebar-backdrop');
+  sidebar?.classList.toggle('open');
+  backdrop?.classList.toggle('show');
+  document.body.classList.toggle('menu-open');
+}
 function confirmDelete(msg='Deseja realmente excluir este registro?'){return confirm(msg)}
 function moneyBR(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 
@@ -30,3 +36,13 @@ function filterSelect(input, selectId){
     opt.hidden=term && !txt.includes(term);
   });
 }
+
+// close sidebar when clicking nav on mobile
+document.addEventListener('click', (e)=>{
+  const a=e.target.closest('.sidebar .nav a');
+  if(a && window.innerWidth<=980){
+    document.querySelector('.sidebar')?.classList.remove('open');
+    document.querySelector('.sidebar-backdrop')?.classList.remove('show');
+    document.body.classList.remove('menu-open');
+  }
+});

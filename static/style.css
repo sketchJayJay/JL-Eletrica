@@ -72,3 +72,199 @@ form .field{display:grid;gap:6px}.field label{font-size:13px;font-weight:750;col
     width:280px;
   }
 }
+
+
+/* ===== MOBILE EXPERIENCE V2 ===== */
+.sidebar-backdrop{display:none}
+.mobile-bottom-nav{display:none}
+
+@media(max-width:980px){
+  body{padding-bottom:74px}
+  body.menu-open{overflow:hidden}
+  .main{padding:14px 12px 28px}
+  .topbar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(245,247,251,.94);
+    backdrop-filter:blur(12px);
+    margin:-14px -12px 16px;
+    padding:12px;
+    border-bottom:1px solid rgba(226,232,240,.9)
+  }
+  .title h1{font-size:21px;line-height:1.15}
+  .title p{font-size:12px;line-height:1.35;margin-top:3px}
+  .mobile-menu{
+    min-width:44px;height:44px;padding:0;
+    border-radius:12px;font-size:19px
+  }
+  .sidebar{
+    left:-290px;width:272px;padding:18px 14px;
+    transition:left .22s ease;
+    border-radius:0 20px 20px 0;
+    overflow-y:auto
+  }
+  .sidebar.open{left:0}
+  .sidebar-backdrop{
+    display:block;position:fixed;inset:0;z-index:29;
+    background:rgba(15,23,42,.52);
+    opacity:0;pointer-events:none;
+    transition:opacity .2s ease
+  }
+  .sidebar-backdrop.show{opacity:1;pointer-events:auto}
+  .brand-logo{padding-bottom:16px}
+  .brand-logo img{max-width:190px}
+  .nav a{
+    padding:13px 14px;
+    min-height:48px;
+    display:flex;align-items:center;
+    font-size:15px
+  }
+
+  .mobile-bottom-nav{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    position:fixed;left:0;right:0;bottom:0;z-index:24;
+    height:68px;
+    background:rgba(255,255,255,.97);
+    border-top:1px solid #e5e7eb;
+    box-shadow:0 -10px 28px rgba(15,23,42,.08);
+    padding:5px 4px max(5px, env(safe-area-inset-bottom))
+  }
+  .mobile-bottom-nav a{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;color:#64748b;border-radius:10px;min-width:0
+  }
+  .mobile-bottom-nav a span{font-size:20px;line-height:1}
+  .mobile-bottom-nav a small{font-size:10px;font-weight:750;white-space:nowrap}
+  .mobile-bottom-nav a.active{color:#111827;background:#fff7d6}
+
+  .grid-kpi{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px
+  }
+  .kpi{padding:14px;border-radius:14px;box-shadow:0 5px 18px rgba(15,23,42,.06)}
+  .kpi span{font-size:11px}
+  .kpi strong{font-size:21px;margin-top:6px}
+  .kpi .hint{font-size:10px}
+
+  .card{
+    padding:14px;border-radius:14px;margin-bottom:13px;
+    box-shadow:0 5px 18px rgba(15,23,42,.055)
+  }
+  .card h2{font-size:16px;margin-bottom:12px}
+  .grid-2,.grid-3{grid-template-columns:1fr;gap:11px}
+  .quick-links{grid-template-columns:1fr 1fr;gap:9px}
+  .quick-links a{padding:13px;border-radius:12px;font-size:14px}
+  .quick-links small{font-size:11px}
+
+  .field input,.field select,.field textarea{
+    min-height:46px;font-size:16px;padding:11px 12px;border-radius:11px
+  }
+  .field textarea{min-height:100px}
+  .field label{font-size:12px}
+  .searchbar{
+    display:grid;grid-template-columns:1fr auto;gap:8px;width:100%
+  }
+  .searchbar input{min-width:0;width:100%;font-size:16px}
+  .searchbar .btn{min-height:46px}
+  .searchbar .btn-outline{grid-column:1/-1}
+
+  .btn{min-height:44px;padding:10px 13px;border-radius:11px}
+  .btn-sm{min-height:38px;padding:8px 11px}
+  .topbar>.actions{width:auto}
+  .topbar>.actions .btn{flex:0 0 auto}
+
+  /* tables become readable cards */
+  .table-wrap{
+    overflow:visible;border:none;border-radius:0;background:transparent
+  }
+  .table{min-width:0;width:100%;border-collapse:separate;border-spacing:0 10px}
+  .table thead{display:none}
+  .table tbody,.table tr,.table td{display:block;width:100%}
+  .table tr{
+    background:#fff;border:1px solid #e6eaf0;border-radius:13px;
+    padding:10px 12px;
+    box-shadow:0 3px 12px rgba(15,23,42,.04)
+  }
+  .table td{
+    display:flex;justify-content:space-between;gap:16px;align-items:center;
+    padding:7px 0;border-bottom:1px dashed #edf0f3;
+    font-size:13px;text-align:right
+  }
+  .table td:last-child{border-bottom:none}
+  .table td::before{
+    content:attr(data-label);
+    flex:0 0 38%;
+    text-align:left;
+    color:#64748b;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.02em
+  }
+  .table td:only-child::before{display:none}
+  .table td.empty{display:block;text-align:center;padding:24px}
+  .table td.empty::before{display:none}
+  .table .actions.row-actions{
+    display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%
+  }
+  .table .actions.row-actions form{display:block;width:100%}
+  .table .actions.row-actions .btn{width:100%}
+
+  .item-row{
+    grid-template-columns:1fr 72px 100px 40px;
+    gap:7px;align-items:end;
+    padding:10px;
+    border:1px solid #edf0f3;
+    border-radius:12px;
+    background:#fafbfc;
+    margin-bottom:9px
+  }
+  .item-row .field:first-child{grid-column:1/-1}
+  .item-row .field input{font-size:15px}
+  .item-row .btn{min-height:46px;height:46px}
+
+  .total-box{
+    position:sticky;bottom:76px;
+    background:#111827;color:#fff;
+    border-radius:12px;
+    padding:12px 14px;
+    margin-top:12px;
+    font-size:18px;
+    z-index:10;
+    box-shadow:0 8px 22px rgba(15,23,42,.16)
+  }
+
+  .dashboard-brand{padding:12px!important}
+  .dashboard-brand img{width:88px!important;max-width:30%!important}
+  .dashboard-brand strong{font-size:16px!important}
+  .dashboard-brand div div{font-size:12px}
+
+  .badge{font-size:11px;padding:5px 8px}
+
+  /* view OS/orçamento details */
+  .card .grid-3 > div{
+    padding:10px 0;border-bottom:1px solid #edf0f3
+  }
+  .card .grid-3 > div:last-child{border-bottom:none}
+  .card.no-print > .actions{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px
+  }
+  .card.no-print > .actions form{width:100%}
+  .card.no-print > .actions .btn{width:100%}
+}
+
+@media(max-width:600px){
+  .grid-kpi{grid-template-columns:1fr 1fr}
+  .kpi strong{font-size:19px}
+  .quick-links{grid-template-columns:1fr 1fr}
+  .topbar{gap:8px}
+  .title{min-width:0}
+  .title h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw}
+  .title p{display:none}
+  .item-row{grid-template-columns:1fr 66px 92px 40px}
+}
+
+@media(max-width:390px){
+  .grid-kpi{grid-template-columns:1fr}
+  .quick-links{grid-template-columns:1fr}
+  .mobile-bottom-nav a small{font-size:9px}
+}

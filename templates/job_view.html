@@ -20,7 +20,11 @@
 </div>
 <div class="card"><h2>Serviços e materiais</h2>
 <div class="table-wrap"><table class="table"><thead><tr><th>Descrição</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr></thead><tbody>
-{% for i in record.items %}<tr><td>{{i.description}}</td><td>{{i.qty}}</td><td>{{brl(i.unit_price)}}</td><td class="money">{{brl(i.total)}}</td></tr>{% endfor %}
+{% for i in record.items %}<tr>
+<td data-label="Descrição">{{i.description}}</td>
+<td data-label="Qtd.">{{i.qty}}</td>
+<td data-label="Unitário">{{brl(i.unit_price)}}</td>
+<td data-label="Total" class="money">{{brl(i.total)}}</td></tr>{% endfor %}
 </tbody></table></div><div class="total-box">Total: {{brl(record.total)}}</div></div>
 
 <div class="card no-print">
