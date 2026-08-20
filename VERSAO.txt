@@ -1,0 +1,1 @@
+2.7 - Excluir lançamentos no Financeiro e nos Relatórios
