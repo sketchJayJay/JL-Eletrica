@@ -1,1 +1,1 @@
-2.7 - Excluir lançamentos no Financeiro e nos Relatórios
+JVS Mecânica v2.8 - exclusão financeira e relatórios corrigida e visível
