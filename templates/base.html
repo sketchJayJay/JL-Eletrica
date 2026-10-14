@@ -1,84 +1,54 @@
+{% macro nav(path, icon, label) -%}
+<a href="{{ path }}" class="{{ 'active' if request.path == path or (path != '/' and request.path.startswith(path)) else '' }}"><span class="ico">{{ icon }}</span>{{ label }}</a>
+{%- endmacro %}
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#061015">
-  <title>{{ title or 'JVS Mecânica' }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2.4">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or 'JL Elétrica' }}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo-jl-eletrica.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 <div class="layout">
-<aside class="sidebar" id="sidebar" aria-label="Menu principal">
-  <div class="brand"><img src="{{ url_for('static', filename='logo-jvs.png') }}" alt="JVS Mecânica"><div><strong>JVS Mecânica</strong><small>Gestão da oficina</small></div><button type="button" class="mobile-close" id="mobileClose" aria-label="Fechar menu">×</button></div>
-  <nav class="nav">
-    <a href="{{ url_for('dashboard') }}">⌂ Dashboard</a>
-    <a href="{{ url_for('clients') }}">👤 Clientes</a>
-    <a href="{{ url_for('vehicles') }}">🚗 Veículos</a>
-    <a href="{{ url_for('inventory') }}">📦 Estoque</a>
-    <a href="{{ url_for('budgets') }}">🧾 Orçamentos</a>
-    <a href="{{ url_for('orders') }}">🔧 Ordens de serviço</a>
-    <a href="{{ url_for('receivables') }}">💰 Contas a receber</a>
-    <a href="{{ url_for('finance') }}">💳 Financeiro</a>
-    <a href="{{ url_for('reports') }}">📊 Relatórios</a>
-    <a href="{{ url_for('company') }}">⚙ Empresa</a>
-  </nav>
-  <div class="sidebar-footer"><a class="btn btn-ghost" style="width:100%" href="{{ url_for('logout') }}">Sair</a></div>
-</aside>
-<div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
-<main class="content">
-  <div class="topbar no-print">
-    <div class="topbar-main">
-      <button type="button" class="btn btn-ghost mobile-toggle" id="mobileToggle" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">☰</button>
-      <div class="topbar-copy"><h1>{{ heading or 'JVS Mecânica' }}</h1><p>{{ subtitle or 'Controle completo da oficina' }}</p></div>
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+  <aside class="sidebar">
+    <div class="brand brand-logo">
+      <img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica">
     </div>
-    <span class="badge">JVS • Oficina Online</span>
-  </div>
-  <div class="flash-wrap">{% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endwith %}</div>
-  {% block content %}{% endblock %}
-</main>
+    <nav class="nav">
+      {{ nav('/', '⌂', 'Dashboard') }}
+      {{ nav('/clientes', '👤', 'Clientes') }}
+      {{ nav('/veiculos', '🚗', 'Veículos') }}
+      {{ nav('/locais', '📍', 'Locais / Instalações') }}
+      {{ nav('/os', '🧰', 'Ordens de Serviço') }}
+      {{ nav('/orcamentos', '🧾', 'Orçamentos') }}
+      {{ nav('/financeiro', '💰', 'Financeiro') }}
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="topbar no-print">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <button class="btn btn-outline mobile-menu" onclick="toggleSidebar()">☰</button>
+        <div class="title"><h1>{{ heading or title or 'JL Elétrica' }}</h1><p>{{ subtitle or '' }}</p></div>
+      </div>
+      <div class="actions">{% block top_actions %}{% endblock %}</div>
+    </div>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}{% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
 </div>
-<script>
-(() => {
-  const sidebar = document.getElementById('sidebar');
-  const toggle = document.getElementById('mobileToggle');
-  const close = document.getElementById('mobileClose');
-  const backdrop = document.getElementById('sidebarBackdrop');
 
-  const setMenu = open => {
-    if (!sidebar) return;
-    sidebar.classList.toggle('open', open);
-    document.body.classList.toggle('menu-open', open);
-    if (toggle) toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  };
-
-  toggle?.addEventListener('click', () => setMenu(!sidebar.classList.contains('open')));
-  close?.addEventListener('click', () => setMenu(false));
-  backdrop?.addEventListener('click', () => setMenu(false));
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
-  sidebar?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { if (innerWidth <= 1050) setMenu(false); }));
-  window.addEventListener('resize', () => { if (innerWidth > 1050) setMenu(false); });
-
-  // Marca automaticamente cada célula com o título da coluna. No celular,
-  // as tabelas viram cartões legíveis sem rolagem horizontal.
-  document.querySelectorAll('.table-wrap table').forEach(table => {
-    const labels = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
-    table.querySelectorAll('tbody tr').forEach(row => {
-      const cells = [...row.querySelectorAll(':scope > td')];
-      if (cells.length === 1 && Number(cells[0].getAttribute('colspan') || 1) > 1) {
-        cells[0].classList.add('mobile-empty-row');
-        return;
-      }
-      cells.forEach((cell, index) => {
-        if (!cell.hasAttribute('data-label')) cell.setAttribute('data-label', labels[index] || '');
-      });
-    });
-  });
-
-  // Teclados mais adequados no celular.
-  document.querySelectorAll('input[name="phone"]').forEach(i => { i.type = 'tel'; i.inputMode = 'tel'; });
-  document.querySelectorAll('input[name="cpf_cnpj"]').forEach(i => { i.inputMode = 'numeric'; });
-})();
-</script>
+<nav class="mobile-bottom-nav no-print">
+  <a href="/" class="{{ 'active' if request.path == '/' else '' }}"><span>⌂</span><small>Início</small></a>
+  <a href="/os" class="{{ 'active' if request.path.startswith('/os') else '' }}"><span>🧰</span><small>OS</small></a>
+  <a href="/orcamentos" class="{{ 'active' if request.path.startswith('/orcamentos') else '' }}"><span>🧾</span><small>Orç.</small></a>
+  <a href="/clientes" class="{{ 'active' if request.path.startswith('/clientes') else '' }}"><span>👤</span><small>Clientes</small></a>
+  <a href="/financeiro" class="{{ 'active' if request.path.startswith('/financeiro') else '' }}"><span>💰</span><small>Financeiro</small></a>
+</nav>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 {% block scripts %}{% endblock %}
-</body></html>
+</body>
+</html>

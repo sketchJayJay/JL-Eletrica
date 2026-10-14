@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% set heading = 'Editar veículo' if vehicle else 'Novo veículo' %}
+{% set subtitle='Cadastre o veículo do cliente para usar nas OS e orçamentos.' %}
+{% block content %}
+<div class="card"><form method="post">
+<div class="grid-2">
+<div class="field"><label>Cliente *</label><input type="search" placeholder="Buscar cliente..." oninput="filterSelect(this,'client-select')"><select id="client-select" name="client_id" required><option value="">Selecione</option>{% for c in clients %}<option value="{{c.id}}" {{ 'selected' if vehicle and vehicle.client_id==c.id else '' }}>{{c.name}}{% if c.phone %} — {{c.phone}}{% endif %}</option>{% endfor %}</select></div>
+<div class="field"><label>Placa</label><input name="plate" maxlength="10" placeholder="ABC1D23" value="{{ vehicle.plate if vehicle else '' }}"></div>
+<div class="field"><label>Marca</label><input name="brand" placeholder="Volkswagen, Fiat, Chevrolet..." value="{{ vehicle.brand if vehicle else '' }}"></div>
+<div class="field"><label>Modelo</label><input name="model" placeholder="Saveiro Cross, Gol, Onix..." value="{{ vehicle.model if vehicle else '' }}"></div>
+<div class="field"><label>Ano</label><input name="year" placeholder="2020/2021" value="{{ vehicle.year if vehicle else '' }}"></div>
+<div class="field"><label>Cor</label><input name="color" value="{{ vehicle.color if vehicle else '' }}"></div>
+</div>
+<div class="field" style="margin-top:12px"><label>Observações</label><textarea name="notes" placeholder="Acessórios instalados, particularidades do veículo...">{{ vehicle.notes if vehicle else '' }}</textarea></div>
+<div class="actions" style="margin-top:14px"><button class="btn btn-accent">Salvar veículo</button><a class="btn btn-outline" href="/veiculos">Cancelar</a></div>
+</form></div>
+{% endblock %}

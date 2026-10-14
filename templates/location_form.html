@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% set heading = 'Editar local / obra' if location else 'Novo local / obra' %}{% set subtitle='Vincule endereços, quadros, instalações ou obras a um cliente.' %}
+{% set heading = 'Editar local / instalação' if location else 'Novo local / instalação' %}{% set subtitle='Cadastre endereços ou locais de atendimento quando necessário.' %}
 {% block content %}<div class="card"><form method="post">
 <div class="grid-2">
 <div class="field"><label>Cliente *</label><input type="search" placeholder="Digite para buscar o cliente..." oninput="filterSelect(this,'client-select')"><select id="client-select" name="client_id" required><option value="">Selecione</option>{% for c in clients %}<option value="{{c.id}}" {{ 'selected' if location and location.client_id==c.id else '' }}>{{c.name}}{% if c.phone %} — {{c.phone}}{% endif %}</option>{% endfor %}</select></div>

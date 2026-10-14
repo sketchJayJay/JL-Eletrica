@@ -5,13 +5,16 @@
 <div class="card"><form method="post">
 <div class="grid-3">
   <div class="field"><label>Cliente *</label><input type="search" placeholder="Digite para buscar o cliente..." oninput="filterSelect(this,'client-select')"><select id="client-select" name="client_id" required><option value="">Selecione</option>{% for c in clients %}<option value="{{c.id}}" {{ 'selected' if record and record.client_id==c.id else '' }}>{{c.name}}{% if c.phone %} — {{c.phone}}{% endif %}</option>{% endfor %}</select></div>
-  <div class="field"><label>Local / Obra</label><input type="search" placeholder="Buscar local ou obra..." oninput="filterSelect(this,'location-select')"><select id="location-select" name="location_id"><option value="">Sem local vinculado</option>{% for l in locations %}<option value="{{l.id}}" {{ 'selected' if record and record.location_id==l.id else '' }}>{{l.client.name}} — {{l.name}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Veículo *</label><input type="search" placeholder="Buscar placa, modelo ou cliente..." oninput="filterSelect(this,'vehicle-select')"><select id="vehicle-select" name="vehicle_id" required><option value="">Selecione o veículo</option>{% for v in vehicles %}<option value="{{v.id}}" {{ 'selected' if record and record.vehicle_id==v.id else '' }}>{{v.client.name}} — {{v.plate or 'Sem placa'}} — {{v.brand}} {{v.model}}</option>{% endfor %}</select></div>
+<div class="field"><label>Tipo de serviço</label><select name="service_type">{% for s in ['Elétrica automotiva','Som automotivo','Alarme automotivo','Acessórios','Iluminação automotiva','Diagnóstico elétrico','Outro'] %}<option value="{{s}}" {{ 'selected' if record and record.service_type==s else '' }}>{{s}}</option>{% endfor %}</select></div>
+<div class="field"><label>Quilometragem</label><input name="mileage" inputmode="numeric" placeholder="Ex.: 125430 km" value="{{ record.mileage if record else '' }}"></div>
+<div class="field"><label>Local / instalação</label><select id="location-select" name="location_id"><option value="">Sem local vinculado</option>{% for l in locations %}<option value="{{l.id}}" {{ 'selected' if record and record.location_id==l.id else '' }}>{{l.client.name}} — {{l.name}}</option>{% endfor %}</select></div>
   <div class="field"><label>Status</label><select name="status">{% for s in statuses %}<option value="{{s}}" {{ 'selected' if record and record.status==s else '' }}>{{s}}</option>{% endfor %}</select></div>
   <div class="field"><label>Data</label><input type="date" name="date" value="{{ record.date.isoformat() if record else today }}"></div>
   {% if kind=='os' %}<div class="field"><label>Previsão / conclusão</label><input type="date" name="due_date" value="{{ record.due_date.isoformat() if record and record.due_date else '' }}"></div>{% endif %}
   <div class="field"><label>Forma de pagamento</label><input name="payment_method" value="{{ record.payment_method if record else '' }}" placeholder="Pix, dinheiro, cartão..."></div>
 </div>
-<div class="field" style="margin-top:12px"><label>Descrição / problema relatado</label><textarea name="description">{{ record.description if record else '' }}</textarea></div>
+<div class="field" style="margin-top:12px"><label>Defeito relatado / serviço solicitado</label><textarea name="description">{{ record.description if record else '' }}</textarea></div>
 <h2 style="margin-top:20px">Itens</h2>
 <div id="items-box">
 {% if record and record.items %}
@@ -25,7 +28,7 @@
   {% endfor %}
 {% else %}
   <div class="item-row">
-    <div class="field"><input name="item_desc[]" placeholder="Descrição do serviço/material" required></div>
+    <div class="field"><input name="item_desc[]" placeholder="Serviço, peça ou material" required></div>
     <div class="field"><input name="item_qty[]" type="number" step="0.01" min="0" value="1" oninput="calcTotal()"></div>
     <div class="field"><input name="item_price[]" type="number" step="0.01" min="0" value="0" oninput="calcTotal()"></div>
     <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove();calcTotal()">×</button>

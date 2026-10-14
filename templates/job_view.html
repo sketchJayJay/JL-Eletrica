@@ -13,6 +13,8 @@
   <div><strong>Data</strong><div>{{record.date.strftime('%d/%m/%Y')}}</div></div>
   <div><strong>Status</strong><div><span class="badge {{status_class(record.status)}}">{{record.status}}</span></div></div>
   {% if record.location %}<div><strong>Local / Obra</strong><div>{{record.location.name}}</div><div style="color:#6b7280">{{record.location.address or ''}}</div></div>{% endif %}
+  {% if record.vehicle %}<div><strong>Veículo</strong><div>{{record.vehicle.brand}} {{record.vehicle.model}}</div><div style="color:#6b7280">{{record.vehicle.plate or 'Sem placa'}}{% if record.vehicle.year %} • {{record.vehicle.year}}{% endif %}{% if record.mileage %} • {{record.mileage}}{% endif %}</div></div>{% endif %}
+  <div><strong>Tipo de serviço</strong><div>{{record.service_type or 'Elétrica automotiva'}}</div></div>
   <div><strong>Pagamento</strong><div>{{record.payment_method or 'Não informado'}}</div></div>
   {% if kind=='os' and record.due_date %}<div><strong>Previsão</strong><div>{{record.due_date.strftime('%d/%m/%Y')}}</div></div>{% endif %}
 </div>
