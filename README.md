@@ -43,3 +43,9 @@ O banco SQLite é inicializado uma única vez por `init_db.py` antes do Gunicorn
 - Nova OS em formato profissional para impressão
 - Envio direto da OS por WhatsApp com cliente, veículo, placa, itens e total
 - Dashboard e atalhos redesenhados
+
+## PDF e WhatsApp
+- PDF real da OS gerado no servidor
+- Compartilhamento do arquivo PDF pelo menu nativo do celular/PWA, permitindo escolher WhatsApp
+- Botão para baixar o PDF
+- Impressão corrigida para não empurrar a tabela inteira para outra página

@@ -4,7 +4,8 @@
 
 {% block top_actions %}
 {% if kind=='os' %}
-<a class="btn btn-whatsapp" href="{{ whatsapp_url(record, 'os') }}" target="_blank" rel="noopener">💬 WhatsApp</a>
+<button class="btn btn-whatsapp" type="button" onclick="shareOrderPdf('/os/{{record.id}}/pdf','OS_JL_Eletrica_{{'%04d'|format(record.id)}}.pdf')">💬 Enviar PDF</button>
+<a class="btn btn-outline" href="/os/{{record.id}}/pdf">⬇ PDF</a>
 {% endif %}
 <button class="btn btn-outline" onclick="window.print()">🖨 Imprimir</button>
 <a class="btn btn-primary" href="/{{ 'os' if kind=='os' else 'orcamentos' }}/{{record.id}}/editar">✎ Editar</a>
@@ -74,13 +75,15 @@
   </div>
   {% endif %}
 
-  <div class="doc-section">
+  {% if record.description and record.description.strip() %}
+  <div class="doc-section service-request-section">
     <div class="doc-section-title"><span>03</span> Serviço solicitado</div>
-    <div class="problem-box">{{record.description or 'Sem descrição informada.'}}</div>
+    <div class="problem-box">{{record.description}}</div>
   </div>
+  {% endif %}
 
-  <div class="doc-section">
-    <div class="doc-section-title"><span>04</span> Serviços, peças e materiais</div>
+  <div class="doc-section items-section">
+    <div class="doc-section-title"><span>{{ '04' if record.description and record.description.strip() else '03' }}</span> Serviços, peças e materiais</div>
     <div class="doc-items-wrap">
       <table class="doc-items">
         <thead><tr><th>Descrição</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr></thead>
@@ -124,10 +127,10 @@
 
 <div class="action-panel no-print">
   {% if kind=='os' %}
-  <a class="action-card whatsapp-action" href="{{ whatsapp_url(record, 'os') }}" target="_blank" rel="noopener">
+  <button class="action-card action-button whatsapp-action" type="button" onclick="shareOrderPdf('/os/{{record.id}}/pdf','OS_JL_Eletrica_{{'%04d'|format(record.id)}}.pdf')">
     <span class="action-icon">💬</span>
-    <div><strong>Enviar no WhatsApp</strong><small>Abre a conversa com a OS pronta</small></div>
-  </a>
+    <div><strong>Enviar PDF no WhatsApp</strong><small>Compartilha a OS em PDF pelo celular</small></div>
+  </button>
   <form method="post" action="/os/{{record.id}}/toggle-pago">
     <button class="action-card action-button">
       <span class="action-icon">{{'↩' if record.paid else '✓'}}</span>
@@ -148,8 +151,11 @@
       </button>
     </form>
   {% endif %}
+  <a class="action-card pdf-action" href="/os/{{record.id}}/pdf">
+    <span class="action-icon">PDF</span><div><strong>Baixar PDF</strong><small>Arquivo pronto para enviar ou guardar</small></div>
+  </a>
   <button class="action-card action-button" onclick="window.print()">
-    <span class="action-icon">🖨</span><div><strong>Imprimir</strong><small>Modelo profissional da OS</small></div>
+    <span class="action-icon">🖨</span><div><strong>Imprimir</strong><small>Imprimir pelo navegador</small></div>
   </button>
   <form method="post" action="/{{'os' if kind=='os' else 'orcamentos'}}/{{record.id}}/excluir" onsubmit="return confirmDelete()">
     <button class="action-card action-button danger-action">

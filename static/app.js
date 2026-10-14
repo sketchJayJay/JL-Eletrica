@@ -46,3 +46,36 @@ document.addEventListener('click', (e)=>{
     document.body.classList.remove('menu-open');
   }
 });
+
+
+async function shareOrderPdf(pdfUrl, fileName){
+  const btn = document.activeElement;
+  const oldText = btn && btn.innerHTML;
+  try{
+    if(btn) btn.classList.add('is-loading');
+    const response = await fetch(pdfUrl, {credentials:'same-origin'});
+    if(!response.ok) throw new Error('Não foi possível gerar o PDF.');
+    const blob = await response.blob();
+    const file = new File([blob], fileName, {type:'application/pdf'});
+
+    if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+      await navigator.share({
+        title:'Ordem de Serviço - JL Elétrica',
+        text:'Segue a Ordem de Serviço da JL Elétrica Automotiva.',
+        files:[file]
+      });
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    alert('O PDF foi baixado. Neste navegador o envio de arquivo direto não é suportado; anexe o PDF no WhatsApp.');
+  }catch(err){
+    if(err && err.name === 'AbortError') return;
+    alert(err?.message || 'Não foi possível compartilhar a OS em PDF.');
+  }finally{
+    if(btn) btn.classList.remove('is-loading');
+  }
+}

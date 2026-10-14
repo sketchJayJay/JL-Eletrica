@@ -31,6 +31,17 @@ form .field{display:grid;gap:6px}.field label{font-size:13px;font-weight:750;col
   .grid-kpi{grid-template-columns:1fr}.quick-links{grid-template-columns:1fr}.title h1{font-size:23px}.topbar{flex-wrap:wrap}.actions{width:100%}.actions .btn{flex:1}.card{padding:14px}.item-row{grid-template-columns:1fr 70px 95px 34px}
 }
 @media print{
+
+  .service-request-section{break-inside:avoid;page-break-inside:avoid}
+  .items-section{break-inside:auto!important;page-break-inside:auto!important}
+  .items-section .doc-section-title{break-after:avoid;page-break-after:avoid}
+  .doc-items-wrap{overflow:visible!important}
+  .doc-items{page-break-inside:auto}
+  .doc-items thead{display:table-header-group}
+  .doc-items tbody{display:table-row-group}
+  .doc-items tr{break-inside:avoid;page-break-inside:avoid}
+  .doc-total{break-inside:avoid;page-break-inside:avoid}
+  .signature-grid{break-inside:avoid;page-break-inside:avoid}
   body{background:white}.sidebar,.topbar,.no-print,.flash{display:none!important}.layout{display:block}.main{padding:0}.card{box-shadow:none;border:none}.print-only{display:block}
   .table{min-width:0}.table th,.table td{font-size:12px}
 }
@@ -68,6 +79,17 @@ form .field{display:grid;gap:6px}.field label{font-size:13px;font-weight:750;col
   }
 }
 @media print{
+
+  .service-request-section{break-inside:avoid;page-break-inside:avoid}
+  .items-section{break-inside:auto!important;page-break-inside:auto!important}
+  .items-section .doc-section-title{break-after:avoid;page-break-after:avoid}
+  .doc-items-wrap{overflow:visible!important}
+  .doc-items{page-break-inside:auto}
+  .doc-items thead{display:table-header-group}
+  .doc-items tbody{display:table-row-group}
+  .doc-items tr{break-inside:avoid;page-break-inside:avoid}
+  .doc-total{break-inside:avoid;page-break-inside:avoid}
+  .signature-grid{break-inside:avoid;page-break-inside:avoid}
   .print-brand img{
     width:280px;
   }
@@ -569,6 +591,17 @@ body{
   .quick-links-premium{grid-template-columns:1fr 1fr}
 }
 @media print{
+
+  .service-request-section{break-inside:avoid;page-break-inside:avoid}
+  .items-section{break-inside:auto!important;page-break-inside:auto!important}
+  .items-section .doc-section-title{break-after:avoid;page-break-after:avoid}
+  .doc-items-wrap{overflow:visible!important}
+  .doc-items{page-break-inside:auto}
+  .doc-items thead{display:table-header-group}
+  .doc-items tbody{display:table-row-group}
+  .doc-items tr{break-inside:avoid;page-break-inside:avoid}
+  .doc-total{break-inside:avoid;page-break-inside:avoid}
+  .signature-grid{break-inside:avoid;page-break-inside:avoid}
   @page{size:A4;margin:10mm}
   body{background:#fff!important;padding:0!important}
   .main{padding:0!important;max-width:none}
@@ -581,8 +614,11 @@ body{
   .doc-title h2{font-size:20px}
   .doc-status-row{padding:0 18px}
   .doc-status-row>div{padding:10px}
-  .doc-section{padding:13px 18px;break-inside:avoid}
+  .doc-section{padding:10px 18px;break-inside:auto;page-break-inside:auto}
   .signature-grid{padding:20px 35px}
   .doc-footer{padding:9px 18px}
   .mobile-bottom-nav,.sidebar-backdrop{display:none!important}
 }
+
+.pdf-action .action-icon{font-size:10px;font-weight:950;background:#fff1b5;color:#725300}
+.btn.is-loading,.action-card.is-loading{opacity:.65;pointer-events:none}

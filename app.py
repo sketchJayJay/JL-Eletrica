@@ -3,7 +3,9 @@ from datetime import date, datetime
 from decimal import Decimal
 from urllib.parse import quote
 import re
-from flask import Flask, render_template, request, redirect, url_for, flash
+from io import BytesIO
+from html import escape
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, extract
 
@@ -176,6 +178,272 @@ def whatsapp_url(record, kind="os"):
     return base + "?text=" + quote(message)
 
 app.jinja_env.globals.update(whatsapp_url=whatsapp_url)
+
+
+
+
+def build_order_pdf(record):
+    from reportlab.lib import colors
+    from reportlab.lib.enums import TA_RIGHT, TA_CENTER
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import mm
+    from reportlab.platypus import (
+        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+        Image as RLImage, KeepTogether
+    )
+
+    buf = BytesIO()
+    accent = colors.HexColor("#F6BD00")
+    dark = colors.HexColor("#11161D")
+    muted = colors.HexColor("#6F7784")
+    line = colors.HexColor("#E5E7EB")
+    soft = colors.HexColor("#F7F8FA")
+
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        rightMargin=9*mm, leftMargin=9*mm,
+        topMargin=8*mm, bottomMargin=12*mm,
+        title=f"OS #{record.id:04d} - JL Elétrica Automotiva",
+        author="JL Elétrica Automotiva",
+    )
+
+    styles = getSampleStyleSheet()
+    normal = ParagraphStyle(
+        "JLNormal", parent=styles["Normal"], fontName="Helvetica",
+        fontSize=8.6, leading=11, textColor=dark
+    )
+    small = ParagraphStyle(
+        "JLSmall", parent=normal, fontSize=7.4, leading=9.2, textColor=muted
+    )
+    label = ParagraphStyle(
+        "JLLabel", parent=small, fontName="Helvetica-Bold",
+        fontSize=6.7, leading=8, textColor=muted, spaceAfter=2
+    )
+    title = ParagraphStyle(
+        "JLTitle", parent=styles["Heading1"], fontName="Helvetica-Bold",
+        fontSize=17, leading=19, textColor=dark, alignment=TA_RIGHT, spaceAfter=2
+    )
+    right = ParagraphStyle("JLRight", parent=normal, alignment=TA_RIGHT)
+    center = ParagraphStyle("JLCenter", parent=normal, alignment=TA_CENTER)
+    section = ParagraphStyle(
+        "JLSection", parent=normal, fontName="Helvetica-Bold",
+        fontSize=8.5, leading=10, textColor=dark
+    )
+    amount = ParagraphStyle(
+        "JLAmount", parent=normal, fontName="Helvetica-Bold",
+        fontSize=14, leading=16, textColor=accent, alignment=TA_RIGHT
+    )
+
+    def P(value, style=normal):
+        value = "" if value is None else str(value)
+        return Paragraph(escape(value).replace("\n", "<br/>"), style)
+
+    def field(lbl, val):
+        return [P(lbl.upper(), label), P(val or "-", normal)]
+
+    def section_bar(number, text):
+        t = Table([
+            [P(number, ParagraphStyle("num", parent=center, fontName="Helvetica-Bold", fontSize=7, textColor=colors.HexColor("#8A6500"))),
+             P(text.upper(), section)]
+        ], colWidths=[10*mm, None])
+        t.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (0,0), colors.HexColor("#FFF3BF")),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("BOX", (0,0), (0,0), 0, colors.white),
+            ("LEFTPADDING", (0,0), (0,0), 3),
+            ("RIGHTPADDING", (0,0), (0,0), 3),
+            ("TOPPADDING", (0,0), (0,0), 4),
+            ("BOTTOMPADDING", (0,0), (0,0), 4),
+            ("LEFTPADDING", (1,0), (1,0), 5),
+            ("RIGHTPADDING", (1,0), (1,0), 0),
+        ]))
+        return t
+
+    story = []
+
+    logo_path = os.path.join(app.root_path, "static", "logo-jl-eletrica.png")
+    logo = RLImage(logo_path, width=30*mm, height=30*mm)
+    header_right = [
+        P("JL ELÉTRICA AUTOMOTIVA", ParagraphStyle("brand", parent=right, fontName="Helvetica-Bold", fontSize=8.2, textColor=muted)),
+        Paragraph("ORDEM DE SERVIÇO", title),
+        P(f"#{record.id:04d}", ParagraphStyle("osnum", parent=right, fontName="Helvetica-Bold", fontSize=12, textColor=accent)),
+        P("Elétrica automotiva • Som • Alarmes • Acessórios", small),
+    ]
+    header = Table([[logo, header_right]], colWidths=[42*mm, 145*mm])
+    header.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("ALIGN", (1,0), (1,0), "RIGHT"),
+        ("LINEBELOW", (0,0), (-1,-1), 2.2, accent),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 7),
+    ]))
+    story += [header, Spacer(1, 4*mm)]
+
+    meta = Table([[
+        field("Data", record.date.strftime("%d/%m/%Y")),
+        field("Status", record.status),
+        field("Pagamento", "Pago" if record.paid else "Pendente"),
+        field("Forma", record.payment_method or "A combinar"),
+    ]], colWidths=[46.5*mm]*4)
+    meta.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), soft),
+        ("BOX", (0,0), (-1,-1), .6, line),
+        ("INNERGRID", (0,0), (-1,-1), .4, line),
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
+        ("LEFTPADDING", (0,0), (-1,-1), 7),
+        ("RIGHTPADDING", (0,0), (-1,-1), 7),
+        ("TOPPADDING", (0,0), (-1,-1), 6),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+    ]))
+    story += [meta, Spacer(1, 4*mm)]
+
+    story += [section_bar("01", "Cliente"), Spacer(1, 2*mm)]
+    client_cells = [
+        field("Nome", record.client.name),
+        field("WhatsApp", record.client.phone or "Não informado"),
+        field("CPF/CNPJ", record.client.document or "-"),
+        field("Cidade", record.client.city or "-"),
+    ]
+    client = Table([client_cells], colWidths=[46.5*mm]*4)
+    client.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "TOP"),
+        ("LINEBELOW", (0,0), (-1,-1), .5, line),
+        ("LEFTPADDING", (0,0), (-1,-1), 0),
+        ("RIGHTPADDING", (0,0), (-1,-1), 8),
+        ("TOPPADDING", (0,0), (-1,-1), 3),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 7),
+    ]))
+    story += [client, Spacer(1, 3*mm)]
+
+    if record.vehicle:
+        story += [section_bar("02", "Veículo"), Spacer(1, 2*mm)]
+        vehicle_name = " ".join(x for x in [record.vehicle.brand, record.vehicle.model] if x).strip() or "Veículo"
+        vehicle_info = Table([
+            [
+                [P("VEÍCULO", label), P(vehicle_name, ParagraphStyle("veh", parent=normal, fontName="Helvetica-Bold", fontSize=10)),
+                 P(" • ".join(x for x in [record.vehicle.year, record.vehicle.color] if x) or "-", small)],
+                [P("PLACA", label), P(record.vehicle.plate or "SEM PLACA", ParagraphStyle("plate", parent=center, fontName="Helvetica-Bold", fontSize=11))]
+            ],
+            [
+                field("Quilometragem", record.mileage or "Não informada"),
+                field("Categoria", record.service_type or "Elétrica automotiva")
+            ]
+        ], colWidths=[128*mm, 58*mm])
+        vehicle_info.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#FFFBEA")),
+            ("BOX", (0,0), (-1,0), .7, colors.HexColor("#E9D98E")),
+            ("INNERGRID", (0,0), (-1,0), .5, colors.HexColor("#E9D98E")),
+            ("LINEBELOW", (0,1), (-1,1), .5, line),
+            ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+            ("LEFTPADDING", (0,0), (-1,-1), 8),
+            ("RIGHTPADDING", (0,0), (-1,-1), 8),
+            ("TOPPADDING", (0,0), (-1,-1), 6),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+        ]))
+        story += [vehicle_info, Spacer(1, 3*mm)]
+
+    # Do not waste vertical space when no service description was supplied.
+    if (record.description or "").strip():
+        story += [section_bar("03", "Serviço solicitado"), Spacer(1, 2*mm)]
+        desc_box = Table([[P(record.description, normal)]], colWidths=[186*mm])
+        desc_box.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,-1), soft),
+            ("LINEBEFORE", (0,0), (0,-1), 3, accent),
+            ("LEFTPADDING", (0,0), (-1,-1), 9),
+            ("RIGHTPADDING", (0,0), (-1,-1), 9),
+            ("TOPPADDING", (0,0), (-1,-1), 7),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 7),
+        ]))
+        story += [desc_box, Spacer(1, 3*mm)]
+
+    items_num = "04" if (record.description or "").strip() else "03"
+    story += [section_bar(items_num, "Serviços, peças e materiais"), Spacer(1, 2*mm)]
+    item_data = [[
+        P("DESCRIÇÃO", ParagraphStyle("th", parent=normal, fontName="Helvetica-Bold", fontSize=7, textColor=colors.white)),
+        P("QTD.", ParagraphStyle("thc", parent=center, fontName="Helvetica-Bold", fontSize=7, textColor=colors.white)),
+        P("UNITÁRIO", ParagraphStyle("thr", parent=right, fontName="Helvetica-Bold", fontSize=7, textColor=colors.white)),
+        P("TOTAL", ParagraphStyle("thr2", parent=right, fontName="Helvetica-Bold", fontSize=7, textColor=colors.white)),
+    ]]
+    for item in record.items:
+        q = float(item.qty or 0)
+        qtxt = str(int(q)) if q.is_integer() else f"{q:.2f}".replace(".", ",")
+        item_data.append([
+            P(item.description, normal),
+            P(qtxt, center),
+            P(brl(item.unit_price), right),
+            P(brl(item.total), ParagraphStyle("rowtotal", parent=right, fontName="Helvetica-Bold")),
+        ])
+    items = Table(item_data, colWidths=[92*mm, 20*mm, 35*mm, 39*mm], repeatRows=1)
+    items.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), dark),
+        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("GRID", (0,0), (-1,-1), .45, line),
+        ("LEFTPADDING", (0,0), (-1,-1), 7),
+        ("RIGHTPADDING", (0,0), (-1,-1), 7),
+        ("TOPPADDING", (0,0), (-1,-1), 6),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+    ]))
+    story += [items, Spacer(1, 2.5*mm)]
+
+    total_box = Table([[
+        P("VALOR TOTAL", ParagraphStyle("totallabel", parent=normal, fontName="Helvetica-Bold", fontSize=7, textColor=colors.HexColor("#B9C0CB"))),
+        P(brl(record.total), amount)
+    ]], colWidths=[33*mm, 48*mm], hAlign="RIGHT")
+    total_box.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,-1), dark),
+        ("BOX", (0,0), (-1,-1), 0, dark),
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("LEFTPADDING", (0,0), (-1,-1), 8),
+        ("RIGHTPADDING", (0,0), (-1,-1), 8),
+        ("TOPPADDING", (0,0), (-1,-1), 7),
+        ("BOTTOMPADDING", (0,0), (-1,-1), 7),
+    ]))
+    story += [KeepTogether(total_box)]
+
+    if (record.notes or "").strip():
+        notes_num = "05" if (record.description or "").strip() else "04"
+        story += [Spacer(1, 3*mm), section_bar(notes_num, "Observações"), Spacer(1, 2*mm)]
+        notes = Table([[P(record.notes, normal)]], colWidths=[186*mm])
+        notes.setStyle(TableStyle([
+            ("BACKGROUND", (0,0), (-1,-1), soft),
+            ("LEFTPADDING", (0,0), (-1,-1), 8),
+            ("RIGHTPADDING", (0,0), (-1,-1), 8),
+            ("TOPPADDING", (0,0), (-1,-1), 6),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 6),
+        ]))
+        story += [notes]
+
+    story += [Spacer(1, 8*mm)]
+    signs = Table([
+        ["", ""],
+        [P("Responsável JL Elétrica", center), P("Assinatura do cliente", center)]
+    ], colWidths=[82*mm, 82*mm], hAlign="CENTER")
+    signs.setStyle(TableStyle([
+        ("LINEABOVE", (0,1), (0,1), .7, muted),
+        ("LINEABOVE", (1,1), (1,1), .7, muted),
+        ("LEFTPADDING", (0,0), (-1,-1), 8),
+        ("RIGHTPADDING", (0,0), (-1,-1), 8),
+        ("TOPPADDING", (0,1), (-1,1), 4),
+    ]))
+    story += [KeepTogether(signs)]
+
+    def footer(canvas, document):
+        canvas.saveState()
+        canvas.setStrokeColor(accent)
+        canvas.setLineWidth(1)
+        canvas.line(9*mm, 8*mm, 201*mm, 8*mm)
+        canvas.setFont("Helvetica-Bold", 6.8)
+        canvas.setFillColor(dark)
+        canvas.drawString(9*mm, 4.8*mm, "JL ELÉTRICA AUTOMOTIVA")
+        canvas.setFont("Helvetica", 6.5)
+        canvas.setFillColor(muted)
+        canvas.drawRightString(201*mm, 4.8*mm, f"OS #{record.id:04d}  |  Página {document.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=footer, onLaterPages=footer)
+    buf.seek(0)
+    return buf
 
 
 def to_date(value):
@@ -369,6 +637,18 @@ def quote_form(id=None):
 
 @app.route("/os/<int:id>")
 def order_view(id): return render_template("job_view.html",record=WorkOrder.query.get_or_404(id),kind="os")
+
+
+@app.route("/os/<int:id>/pdf")
+def order_pdf(id):
+    record = WorkOrder.query.get_or_404(id)
+    pdf = build_order_pdf(record)
+    return send_file(
+        pdf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"OS_JL_Eletrica_{record.id:04d}.pdf"
+    )
 
 @app.route("/orcamentos/<int:id>")
 def quote_view(id): return render_template("job_view.html",record=Quote.query.get_or_404(id),kind="orc")
