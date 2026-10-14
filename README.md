@@ -36,3 +36,10 @@ O banco SQLite é inicializado uma única vez por `init_db.py` antes do Gunicorn
 - Histórico de OS e orçamento por veículo
 - Quilometragem
 - Categorias: elétrica automotiva, som, alarme, acessórios, iluminação e diagnóstico
+
+## Atualização premium
+- Nova identidade visual com logo automotiva
+- Layout premium grafite/amarelo
+- Nova OS em formato profissional para impressão
+- Envio direto da OS por WhatsApp com cliente, veículo, placa, itens e total
+- Dashboard e atalhos redesenhados

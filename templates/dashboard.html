@@ -1,42 +1,55 @@
 {% extends 'base.html' %}
-{% set heading='Dashboard' %}{% set subtitle='Visão mensal da oficina: elétrica, som e alarmes automotivos.' %}
+{% set heading='Painel da oficina' %}
+{% set subtitle='JL Elétrica Automotiva • controle rápido do dia e do mês.' %}
 {% block content %}
-<div class="card dashboard-brand no-print" style="display:flex;align-items:center;gap:18px;padding:16px 18px">
-  <img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica" style="width:120px;max-width:32%;border-radius:12px">
-  <div>
-    <strong style="font-size:18px">JL Elétrica Automotiva</strong>
-    <div style="color:#6b7280;margin-top:4px">Elétrica • Som • Alarmes automotivos</div>
+<section class="dashboard-hero no-print">
+  <div class="hero-logo"><img src="{{ url_for('static', filename='logo-jl-eletrica.png') }}" alt="JL Elétrica"></div>
+  <div class="hero-content">
+    <span class="hero-eyebrow">GESTÃO AUTOMOTIVA</span>
+    <h2>JL Elétrica</h2>
+    <p>Elétrica automotiva, som, alarmes e acessórios em um só painel.</p>
+    <div class="hero-actions">
+      <a href="/os/novo" class="btn btn-accent">＋ Nova OS</a>
+      <a href="/veiculos/novo" class="btn btn-dark-soft">＋ Veículo</a>
+    </div>
   </div>
+</section>
+
+<div class="grid-kpi premium-kpis">
+  <a class="kpi" href="/financeiro"><span>Faturado no mês</span><strong>{{ brl(receita_mes) }}</strong><div class="hint">OS já recebidas</div></a>
+  <a class="kpi" href="/os"><span>OS no mês</span><strong>{{ os_mes }}</strong><div class="hint">{{ os_abertas }} ainda em aberto</div></a>
+  <a class="kpi" href="/orcamentos"><span>Orçamentos</span><strong>{{ orc_mes }}</strong><div class="hint">{{ orc_aprovados }} aprovados</div></a>
+  <a class="kpi warning-kpi" href="/financeiro"><span>A receber</span><strong>{{ brl(a_receber) }}</strong><div class="hint">Valores pendentes</div></a>
 </div>
-<div class="grid-kpi">
-  <div class="kpi"><span>Faturado no mês</span><strong>{{ brl(receita_mes) }}</strong><div class="hint">OS pagas</div></div>
-  <div class="kpi"><span>OS no mês</span><strong>{{ os_mes }}</strong><div class="hint">{{ os_abertas }} em aberto</div></div>
-  <div class="kpi"><span>Orçamentos no mês</span><strong>{{ orc_mes }}</strong><div class="hint">{{ orc_aprovados }} aprovados</div></div>
-  <div class="kpi"><span>A receber</span><strong>{{ brl(a_receber) }}</strong><div class="hint">Serviços não pagos</div></div>
+
+<div class="quick-links quick-links-premium">
+  <a href="/os/novo"><span class="quick-icon">🧰</span><div>Nova OS<small>Registrar atendimento</small></div></a>
+  <a href="/orcamentos/novo"><span class="quick-icon">🧾</span><div>Novo orçamento<small>Montar proposta</small></div></a>
+  <a href="/clientes/novo"><span class="quick-icon">👤</span><div>Novo cliente<small>Cadastro rápido</small></div></a>
+  <a href="/veiculos/novo"><span class="quick-icon">🚗</span><div>Novo veículo<small>Placa e histórico</small></div></a>
 </div>
-<div class="quick-links">
-  <a href="/os/novo">＋ Nova OS<small>Abrir ordem de serviço</small></a>
-  <a href="/orcamentos/novo">＋ Novo orçamento<small>Criar e imprimir</small></a>
-  <a href="/clientes/novo">＋ Novo cliente<small>Cadastro rápido</small></a>
-  <a href="/financeiro">↗ Financeiro<small>Resumo mensal</small></a>
-</div>
-<div class="grid-2" style="margin-top:18px">
-  <div class="card"><h2>Últimas ordens de serviço</h2>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
+
+<div class="grid-2 dashboard-tables" style="margin-top:18px">
+  <div class="card">
+    <div class="section-head"><div><span class="section-kicker">OFICINA</span><h2>Últimas ordens de serviço</h2></div><a href="/os">Ver todas →</a></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>OS</th><th>Cliente / veículo</th><th>Status</th><th>Total</th></tr></thead><tbody>
     {% for x in ultimas_os %}<tr>
-<td data-label="Nº"><a href="/os/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
-<td data-label="Cliente">{{ x.client.name }}</td>
-<td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
-<td data-label="Total" class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhuma OS ainda.</td></tr>{% endfor %}
+      <td data-label="OS"><a href="/os/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
+      <td data-label="Cliente / veículo"><strong>{{ x.client.name }}</strong>{% if x.vehicle %}<small class="cell-sub">{{x.vehicle.plate or ''}} • {{x.vehicle.brand}} {{x.vehicle.model}}</small>{% endif %}</td>
+      <td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
+      <td data-label="Total" class="money">{{ brl(x.total) }}</td>
+    </tr>{% else %}<tr><td colspan="4" class="empty">Nenhuma OS ainda.</td></tr>{% endfor %}
     </tbody></table></div>
   </div>
-  <div class="card"><h2>Últimos orçamentos</h2>
-    <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente</th><th>Status</th><th>Total</th></tr></thead><tbody>
+  <div class="card">
+    <div class="section-head"><div><span class="section-kicker">COMERCIAL</span><h2>Últimos orçamentos</h2></div><a href="/orcamentos">Ver todos →</a></div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Nº</th><th>Cliente / veículo</th><th>Status</th><th>Total</th></tr></thead><tbody>
     {% for x in ultimos_orc %}<tr>
-<td data-label="Nº"><a href="/orcamentos/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
-<td data-label="Cliente">{{ x.client.name }}</td>
-<td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
-<td data-label="Total" class="money">{{ brl(x.total) }}</td></tr>{% else %}<tr><td colspan="4" class="empty">Nenhum orçamento ainda.</td></tr>{% endfor %}
+      <td data-label="Nº"><a href="/orcamentos/{{ x.id }}"><strong>#{{ '%04d'|format(x.id) }}</strong></a></td>
+      <td data-label="Cliente / veículo"><strong>{{ x.client.name }}</strong>{% if x.vehicle %}<small class="cell-sub">{{x.vehicle.plate or ''}} • {{x.vehicle.brand}} {{x.vehicle.model}}</small>{% endif %}</td>
+      <td data-label="Status"><span class="badge {{ status_class(x.status) }}">{{ x.status }}</span></td>
+      <td data-label="Total" class="money">{{ brl(x.total) }}</td>
+    </tr>{% else %}<tr><td colspan="4" class="empty">Nenhum orçamento ainda.</td></tr>{% endfor %}
     </tbody></table></div>
   </div>
 </div>

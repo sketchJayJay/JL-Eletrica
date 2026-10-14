@@ -5,7 +5,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{{ title or 'JL Elétrica' }}</title>
+  <title>{{ title or 'JL Elétrica Automotiva' }}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo-jl-eletrica.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -18,12 +18,12 @@
     </div>
     <nav class="nav">
       {{ nav('/', '⌂', 'Dashboard') }}
-      {{ nav('/clientes', '👤', 'Clientes') }}
-      {{ nav('/veiculos', '🚗', 'Veículos') }}
-      {{ nav('/locais', '📍', 'Locais / Instalações') }}
       {{ nav('/os', '🧰', 'Ordens de Serviço') }}
       {{ nav('/orcamentos', '🧾', 'Orçamentos') }}
+      {{ nav('/clientes', '👤', 'Clientes') }}
+      {{ nav('/veiculos', '🚗', 'Veículos') }}
       {{ nav('/financeiro', '💰', 'Financeiro') }}
+      {{ nav('/locais', '📍', 'Atendimentos externos') }}
     </nav>
   </aside>
   <main class="main">

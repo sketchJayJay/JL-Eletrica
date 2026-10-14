@@ -1,44 +1,160 @@
 {% extends 'base.html' %}
 {% set heading=('Ordem de Serviço #' if kind=='os' else 'Orçamento #') ~ '%04d'|format(record.id) %}
-{% set subtitle=record.client.name %}
-{% block top_actions %}
-<button class="btn btn-outline" onclick="window.print()">🖨 Imprimir</button>
-<a class="btn btn-primary" href="/{{ 'os' if kind=='os' else 'orcamentos' }}/{{record.id}}/editar">Editar</a>
-{% endblock %}
-{% block content %}
-<div class="print-only print-brand"><img src="{{url_for('static',filename='logo-jl-eletrica.png')}}" alt="JL Elétrica"></div>
-<div class="card">
-<div class="grid-3">
-  <div><strong>Cliente</strong><div>{{record.client.name}}</div><div style="color:#6b7280">{{record.client.phone or ''}}</div></div>
-  <div><strong>Data</strong><div>{{record.date.strftime('%d/%m/%Y')}}</div></div>
-  <div><strong>Status</strong><div><span class="badge {{status_class(record.status)}}">{{record.status}}</span></div></div>
-  {% if record.location %}<div><strong>Local / Obra</strong><div>{{record.location.name}}</div><div style="color:#6b7280">{{record.location.address or ''}}</div></div>{% endif %}
-  {% if record.vehicle %}<div><strong>Veículo</strong><div>{{record.vehicle.brand}} {{record.vehicle.model}}</div><div style="color:#6b7280">{{record.vehicle.plate or 'Sem placa'}}{% if record.vehicle.year %} • {{record.vehicle.year}}{% endif %}{% if record.mileage %} • {{record.mileage}}{% endif %}</div></div>{% endif %}
-  <div><strong>Tipo de serviço</strong><div>{{record.service_type or 'Elétrica automotiva'}}</div></div>
-  <div><strong>Pagamento</strong><div>{{record.payment_method or 'Não informado'}}</div></div>
-  {% if kind=='os' and record.due_date %}<div><strong>Previsão</strong><div>{{record.due_date.strftime('%d/%m/%Y')}}</div></div>{% endif %}
-</div>
-{% if record.description %}<hr style="border:none;border-top:1px solid #eee;margin:16px 0"><strong>Descrição</strong><p>{{record.description}}</p>{% endif %}
-</div>
-<div class="card"><h2>Serviços e materiais</h2>
-<div class="table-wrap"><table class="table"><thead><tr><th>Descrição</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr></thead><tbody>
-{% for i in record.items %}<tr>
-<td data-label="Descrição">{{i.description}}</td>
-<td data-label="Qtd.">{{i.qty}}</td>
-<td data-label="Unitário">{{brl(i.unit_price)}}</td>
-<td data-label="Total" class="money">{{brl(i.total)}}</td></tr>{% endfor %}
-</tbody></table></div><div class="total-box">Total: {{brl(record.total)}}</div></div>
+{% set subtitle=(record.vehicle.plate ~ ' • ' if record.vehicle and record.vehicle.plate else '') ~ record.client.name %}
 
-<div class="card no-print">
-  <div class="actions">
+{% block top_actions %}
+{% if kind=='os' %}
+<a class="btn btn-whatsapp" href="{{ whatsapp_url(record, 'os') }}" target="_blank" rel="noopener">💬 WhatsApp</a>
+{% endif %}
+<button class="btn btn-outline" onclick="window.print()">🖨 Imprimir</button>
+<a class="btn btn-primary" href="/{{ 'os' if kind=='os' else 'orcamentos' }}/{{record.id}}/editar">✎ Editar</a>
+{% endblock %}
+
+{% block content %}
+<section class="service-document">
+  <header class="doc-header">
+    <div class="doc-brand">
+      <img src="{{url_for('static',filename='logo-jl-eletrica.png')}}" alt="JL Elétrica">
+    </div>
+    <div class="doc-title">
+      <span class="doc-kicker">JL ELÉTRICA AUTOMOTIVA</span>
+      <h2>{{ 'ORDEM DE SERVIÇO' if kind=='os' else 'ORÇAMENTO' }}</h2>
+      <div class="doc-number">#{{ '%04d'|format(record.id) }}</div>
+    </div>
+  </header>
+
+  <div class="doc-status-row">
+    <div>
+      <span class="doc-label">Data</span>
+      <strong>{{record.date.strftime('%d/%m/%Y')}}</strong>
+    </div>
+    <div>
+      <span class="doc-label">Status</span>
+      <span class="badge {{status_class(record.status)}}">{{record.status}}</span>
+    </div>
     {% if kind=='os' %}
-      <form method="post" action="/os/{{record.id}}/toggle-pago"><button class="btn {{'btn-outline' if record.paid else 'btn-success'}}">{{'Marcar como não pago' if record.paid else '✓ Marcar como pago'}}</button></form>
-    {% else %}
-      {% if record.status != 'Aprovado' %}<form method="post" action="/orcamentos/{{record.id}}/aprovar"><button class="btn btn-success">✓ Aprovar orçamento</button></form>{% endif %}
-      <form method="post" action="/orcamentos/{{record.id}}/converter"><button class="btn btn-accent">⚡ Converter em OS</button></form>
+    <div>
+      <span class="doc-label">Pagamento</span>
+      <span class="badge {{'green' if record.paid else 'yellow'}}">{{'Pago' if record.paid else 'Pendente'}}</span>
+    </div>
     {% endif %}
-    <form method="post" action="/{{'os' if kind=='os' else 'orcamentos'}}/{{record.id}}/excluir" onsubmit="return confirmDelete()"><button class="btn btn-danger">Excluir</button></form>
+    <div>
+      <span class="doc-label">Forma de pagamento</span>
+      <strong>{{record.payment_method or 'A combinar'}}</strong>
+    </div>
   </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title"><span>01</span> Cliente</div>
+    <div class="doc-info-grid">
+      <div><span class="doc-label">Nome</span><strong>{{record.client.name}}</strong></div>
+      <div><span class="doc-label">WhatsApp</span><strong>{{record.client.phone or 'Não informado'}}</strong></div>
+      {% if record.client.document %}<div><span class="doc-label">CPF/CNPJ</span><strong>{{record.client.document}}</strong></div>{% endif %}
+      {% if record.client.city %}<div><span class="doc-label">Cidade</span><strong>{{record.client.city}}</strong></div>{% endif %}
+    </div>
+  </div>
+
+  {% if record.vehicle %}
+  <div class="doc-section vehicle-section">
+    <div class="doc-section-title"><span>02</span> Veículo</div>
+    <div class="vehicle-highlight">
+      <div class="vehicle-main">
+        <span class="vehicle-icon">🚗</span>
+        <div>
+          <strong>{{record.vehicle.brand}} {{record.vehicle.model}}</strong>
+          <small>{{record.vehicle.year or 'Ano não informado'}}{% if record.vehicle.color %} • {{record.vehicle.color}}{% endif %}</small>
+        </div>
+      </div>
+      <div class="plate-box">{{record.vehicle.plate or 'SEM PLACA'}}</div>
+    </div>
+    <div class="doc-info-grid compact">
+      <div><span class="doc-label">Quilometragem</span><strong>{{record.mileage or 'Não informada'}}</strong></div>
+      <div><span class="doc-label">Categoria</span><strong>{{record.service_type or 'Elétrica automotiva'}}</strong></div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="doc-section">
+    <div class="doc-section-title"><span>03</span> Serviço solicitado</div>
+    <div class="problem-box">{{record.description or 'Sem descrição informada.'}}</div>
+  </div>
+
+  <div class="doc-section">
+    <div class="doc-section-title"><span>04</span> Serviços, peças e materiais</div>
+    <div class="doc-items-wrap">
+      <table class="doc-items">
+        <thead><tr><th>Descrição</th><th>Qtd.</th><th>Unitário</th><th>Total</th></tr></thead>
+        <tbody>
+        {% for i in record.items %}
+          <tr>
+            <td data-label="Descrição">{{i.description}}</td>
+            <td data-label="Qtd.">{{i.qty}}</td>
+            <td data-label="Unitário">{{brl(i.unit_price)}}</td>
+            <td data-label="Total"><strong>{{brl(i.total)}}</strong></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="doc-total">
+      <span>VALOR TOTAL</span>
+      <strong>{{brl(record.total)}}</strong>
+    </div>
+  </div>
+
+  {% if record.notes %}
+  <div class="doc-section">
+    <div class="doc-section-title"><span>05</span> Observações</div>
+    <div class="notes-box">{{record.notes}}</div>
+  </div>
+  {% endif %}
+
+  {% if kind=='os' %}
+  <div class="signature-grid">
+    <div><span></span><small>Responsável JL Elétrica</small></div>
+    <div><span></span><small>Assinatura do cliente</small></div>
+  </div>
+  {% endif %}
+
+  <footer class="doc-footer">
+    <strong>JL ELÉTRICA</strong>
+    <span>Elétrica automotiva • Som • Alarmes • Acessórios</span>
+  </footer>
+</section>
+
+<div class="action-panel no-print">
+  {% if kind=='os' %}
+  <a class="action-card whatsapp-action" href="{{ whatsapp_url(record, 'os') }}" target="_blank" rel="noopener">
+    <span class="action-icon">💬</span>
+    <div><strong>Enviar no WhatsApp</strong><small>Abre a conversa com a OS pronta</small></div>
+  </a>
+  <form method="post" action="/os/{{record.id}}/toggle-pago">
+    <button class="action-card action-button">
+      <span class="action-icon">{{'↩' if record.paid else '✓'}}</span>
+      <div><strong>{{'Marcar como não pago' if record.paid else 'Marcar como pago'}}</strong><small>Atualizar situação financeira</small></div>
+    </button>
+  </form>
+  {% else %}
+    {% if record.status != 'Aprovado' %}
+    <form method="post" action="/orcamentos/{{record.id}}/aprovar">
+      <button class="action-card action-button">
+        <span class="action-icon">✓</span><div><strong>Aprovar orçamento</strong><small>Marcar como aprovado</small></div>
+      </button>
+    </form>
+    {% endif %}
+    <form method="post" action="/orcamentos/{{record.id}}/converter">
+      <button class="action-card action-button">
+        <span class="action-icon">⚡</span><div><strong>Converter em OS</strong><small>Criar ordem de serviço</small></div>
+      </button>
+    </form>
+  {% endif %}
+  <button class="action-card action-button" onclick="window.print()">
+    <span class="action-icon">🖨</span><div><strong>Imprimir</strong><small>Modelo profissional da OS</small></div>
+  </button>
+  <form method="post" action="/{{'os' if kind=='os' else 'orcamentos'}}/{{record.id}}/excluir" onsubmit="return confirmDelete()">
+    <button class="action-card action-button danger-action">
+      <span class="action-icon">🗑</span><div><strong>Excluir</strong><small>Remover este registro</small></div>
+    </button>
+  </form>
 </div>
-{% if record.notes %}<div class="card"><h2>Observações</h2><p>{{record.notes}}</p></div>{% endif %}
 {% endblock %}

@@ -1,6 +1,8 @@
 import os
 from datetime import date, datetime
 from decimal import Decimal
+from urllib.parse import quote
+import re
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, extract
@@ -119,6 +121,62 @@ def status_class(s):
     return "gray"
 
 app.jinja_env.globals.update(brl=brl,status_class=status_class)
+
+
+def whatsapp_url(record, kind="os"):
+    phone = re.sub(r"\D", "", (record.client.phone or ""))
+    if phone.startswith("0"):
+        phone = phone.lstrip("0")
+    if phone and not phone.startswith("55"):
+        phone = "55" + phone
+
+    doc = "ORDEM DE SERVIÇO" if kind == "os" else "ORÇAMENTO"
+    lines = [
+        f"*JL ELÉTRICA AUTOMOTIVA*",
+        f"*{doc} #{record.id:04d}*",
+        "",
+        f"Cliente: {record.client.name}",
+    ]
+
+    if getattr(record, "vehicle", None):
+        vehicle = " ".join(x for x in [
+            record.vehicle.brand or "",
+            record.vehicle.model or "",
+            record.vehicle.year or ""
+        ] if x).strip()
+        if vehicle:
+            lines.append(f"Veículo: {vehicle}")
+        if record.vehicle.plate:
+            lines.append(f"Placa: {record.vehicle.plate}")
+    if getattr(record, "mileage", ""):
+        lines.append(f"KM: {record.mileage}")
+    if getattr(record, "service_type", ""):
+        lines.append(f"Serviço: {record.service_type}")
+    lines += [
+        f"Data: {record.date.strftime('%d/%m/%Y')}",
+        f"Status: {record.status}",
+        "",
+        "*SERVIÇOS / PEÇAS*",
+    ]
+    for item in record.items:
+        qty = float(item.qty or 0)
+        qty_txt = str(int(qty)) if qty.is_integer() else str(qty).replace(".", ",")
+        lines.append(f"• {qty_txt}x {item.description} — {brl(item.total)}")
+    lines += [
+        "",
+        f"*TOTAL: {brl(record.total)}*",
+    ]
+    if getattr(record, "payment_method", ""):
+        lines.append(f"Pagamento: {record.payment_method}")
+    if getattr(record, "notes", ""):
+        lines += ["", f"Observações: {record.notes}"]
+    lines += ["", "Obrigado pela preferência! ⚡🚗"]
+    message = "\n".join(lines)
+    base = f"https://wa.me/{phone}" if phone else "https://wa.me/"
+    return base + "?text=" + quote(message)
+
+app.jinja_env.globals.update(whatsapp_url=whatsapp_url)
+
 
 def to_date(value):
     try: return datetime.strptime(value, "%Y-%m-%d").date() if value else None
